@@ -82,3 +82,23 @@ func (m *MemoryDataAccess) Delete(id ID) error {
 	delete(m.articles, id)
 	return nil
 }
+
+// ResponseError is the error for the JSON response.
+type ResponseError struct {
+	Err error
+}
+
+// MarshalJSON returns the JSON representation of the error.
+func (err ResponseError) MarshalJSON() ([]byte, error) {
+	if err.Err == nil {
+		return []byte("null"), nil
+	}
+	return []byte(fmt.Sprintf(`"%v"`, err.Err)), nil
+}
+
+// Response is a struct for the JSON response.
+type Response struct {
+	ID      ID            `json:"id"`
+	Article Article       `json:"article"`
+	Error   ResponseError `json:"error"`
+}
