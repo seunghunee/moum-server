@@ -1,4 +1,4 @@
-package main
+package article
 
 import (
 	"reflect"
@@ -6,11 +6,11 @@ import (
 )
 
 func TestArticleCRUD(t *testing.T) {
-	a1 := Article{"test title1", "test body1"}
-	a2 := Article{"test title2", "test body2"}
-	a3 := Article{"test title3", "test body3"}
+	a2 := Article{Title: "test title2", Body: "test body2"}
+	a1 := Article{Title: "test title1", Body: "test body1"}
+	a3 := Article{Title: "test title3", Body: "test body3"}
 
-	d := NewMemoryDataAccess()
+	d := NewInMemoryAccessor()
 
 	id, _ := d.Create(a1)
 	readArticle, err := d.Read(id)
@@ -38,7 +38,7 @@ func TestArticleCRUD(t *testing.T) {
 		t.Errorf("got: %q, want: %s", readArticle, a3)
 	}
 
-	updatedArticle := Article{"updated title2", "updated body2"}
+	updatedArticle := Article{Title: "updated title2", Body: "updated body2"}
 	if err := d.Update(article2id, updatedArticle); err != nil {
 		t.Error(err.Error())
 	}
