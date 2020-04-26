@@ -41,13 +41,13 @@ func (m *InMemoryAccessor) Read(id string) (model.Article, error) {
 	return a, nil
 }
 
-// Update updates a article with a given ID with input.
-func (m *InMemoryAccessor) Update(id string, input model.AddArticleInput) error {
-	if _, exists := m.articles[id]; !exists {
+// Update updates a article with input.
+func (m *InMemoryAccessor) Update(input model.UpdateArticleInput) error {
+	if _, exists := m.articles[input.ID]; !exists {
 		return ErrArticleNotExist
 	}
-	m.articles[id] = model.Article{
-		ID:    id,
+	m.articles[input.ID] = model.Article{
+		ID:    input.ID,
 		Title: input.Title,
 		Body:  input.Body,
 	}

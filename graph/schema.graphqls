@@ -14,6 +14,7 @@ type Article implements Node {
 
 type Mutation {
   addArticle(input: addArticleInput!): AddArticlePayload
+  updateArticle(input: updateArticleInput!): UpdateArticlePayload
 }
 
 input addArticleInput {
@@ -21,6 +22,16 @@ input addArticleInput {
   body: String
 }
 
+input updateArticleInput {
+  id: ID!
+  title: String!
+  body: String
+}
+
 type AddArticlePayload {
+  article: Article
+}
+
+type UpdateArticlePayload {
   article: Article
 }

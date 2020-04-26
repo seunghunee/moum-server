@@ -44,7 +44,7 @@ func TestArticleCRUD(t *testing.T) {
 
 	updatedBody2 := "updated body2"
 	updatedArticleInput := model.AddArticleInput{Title: "updated title2", Body: &updatedBody2}
-	if err := d.Update(article2id, updatedArticleInput); err != nil {
+	if err := d.Update(model.UpdateArticleInput{ID: article2id, Title: updatedArticleInput.Title, Body: updatedArticleInput.Body}); err != nil {
 		t.Error(err.Error())
 	}
 	readArticle, err = d.Read(article2id)

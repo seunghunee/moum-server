@@ -10,7 +10,7 @@ import (
 type Accessor interface {
 	Create(input model.AddArticleInput) (string, error)
 	Read(id string) (model.Article, error)
-	Update(id string, input model.AddArticleInput) error
+	Update(input model.UpdateArticleInput) error
 	Delete(id string) error
 }
 
