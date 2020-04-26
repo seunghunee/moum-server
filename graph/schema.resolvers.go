@@ -33,6 +33,13 @@ func (r *mutationResolver) UpdateArticle(ctx context.Context, input model.Update
 	return &model.UpdateArticlePayload{Article: &a}, nil
 }
 
+func (r *mutationResolver) DeleteArticle(ctx context.Context, input model.DeleteArticleInput) (*model.DeleteArticlePayload, error) {
+	if err := r.Accessor.Delete(input.ID); err != nil {
+		return &model.DeleteArticlePayload{}, err
+	}
+	return &model.DeleteArticlePayload{DeletedID: input.ID}, nil
+}
+
 func (r *queryResolver) Node(ctx context.Context, id string) (model.Node, error) {
 	a, err := r.Accessor.Read(id)
 	if err != nil {
