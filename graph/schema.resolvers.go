@@ -5,31 +5,29 @@ package graph
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"math/rand"
 
 	"github.com/seunghunee/moum-server/graph/generated"
 	"github.com/seunghunee/moum-server/graph/model"
 )
 
 func (r *mutationResolver) AddArticle(ctx context.Context, input model.AddArticleInput) (*model.AddArticlePayload, error) {
-	article := &model.Article{
-		ID:    fmt.Sprintf("%d", rand.Int()),
-		Title: input.Title,
-		Body:  input.Body,
+	id, err := r.Accessor.Create(input)
+	if err != nil {
+		return &model.AddArticlePayload{}, err
 	}
-	r.articles = append(r.articles, article)
-	return &model.AddArticlePayload{Article: article}, nil
+	a, err := r.Accessor.Read(id)
+	if err != nil {
+		return &model.AddArticlePayload{}, err
+	}
+	return &model.AddArticlePayload{Article: &a}, nil
 }
 
 func (r *queryResolver) Node(ctx context.Context, id string) (model.Node, error) {
-	for _, a := range r.articles {
-		if a.ID == id {
-			return *a, nil
-		}
+	a, err := r.Accessor.Read(id)
+	if err != nil {
+		return model.Article{}, err
 	}
-	return model.Article{}, errors.New("article does not exist")
+	return a, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
