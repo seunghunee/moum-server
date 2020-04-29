@@ -67,3 +67,8 @@ func (m *InMemoryAccessor) Delete(id string) error {
 	}
 	return ErrArticleNotExist
 }
+
+// List returns all items of list.
+func (m *InMemoryAccessor) List() ([]*model.Article, error) {
+	return m.articles, nil
+}
