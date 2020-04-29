@@ -8,14 +8,14 @@ import (
 
 // InMemoryAccessor is a simple in-memory database.
 type InMemoryAccessor struct {
-	articles map[string]model.Article
+	articles []*model.Article
 	nextID   int64
 }
 
 // NewInMemoryAccessor returns a new MemoryDataAccess.
 func NewInMemoryAccessor() Accessor {
 	return &InMemoryAccessor{
-		articles: map[string]model.Article{},
+		articles: []*model.Article{},
 		nextID:   int64(1),
 	}
 }
@@ -24,41 +24,46 @@ func NewInMemoryAccessor() Accessor {
 func (m *InMemoryAccessor) Create(input model.AddArticleInput) (string, error) {
 	id := fmt.Sprint(m.nextID)
 	m.nextID++
-	m.articles[id] = model.Article{
+	m.articles = append(m.articles, &model.Article{
 		ID:    id,
 		Title: input.Title,
 		Body:  input.Body,
-	}
+	})
 	return id, nil
 }
 
 // Read returns a article with a given ID.
 func (m *InMemoryAccessor) Read(id string) (model.Article, error) {
-	a, exists := m.articles[id]
-	if !exists {
-		return model.Article{}, ErrArticleNotExist
+	for _, a := range m.articles {
+		if a.ID == id {
+			return *a, nil
+		}
 	}
-	return a, nil
+	return model.Article{}, ErrArticleNotExist
 }
 
 // Update updates a article with input.
 func (m *InMemoryAccessor) Update(input model.UpdateArticleInput) error {
-	if _, exists := m.articles[input.ID]; !exists {
-		return ErrArticleNotExist
+	for i, a := range m.articles {
+		if a.ID == input.ID {
+			m.articles[i] = &model.Article{
+				ID:    input.ID,
+				Title: input.Title,
+				Body:  input.Body,
+			}
+			return nil
+		}
 	}
-	m.articles[input.ID] = model.Article{
-		ID:    input.ID,
-		Title: input.Title,
-		Body:  input.Body,
-	}
-	return nil
+	return ErrArticleNotExist
 }
 
 // Delete removes the article with a given ID.
 func (m *InMemoryAccessor) Delete(id string) error {
-	if _, exists := m.articles[id]; !exists {
-		return ErrArticleNotExist
+	for i, a := range m.articles {
+		if a.ID == id {
+			m.articles = append(m.articles[:i], m.articles[i+1:]...)
+			return nil
+		}
 	}
-	delete(m.articles, id)
-	return nil
+	return ErrArticleNotExist
 }
