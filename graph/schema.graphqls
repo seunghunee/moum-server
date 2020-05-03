@@ -3,6 +3,7 @@ interface Node {
 }
 
 type Query {
+  articles: [Article!]!
   node(id: ID!): Node
 }
 

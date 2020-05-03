@@ -40,6 +40,10 @@ func (r *mutationResolver) DeleteArticle(ctx context.Context, input model.Delete
 	return &model.DeleteArticlePayload{DeletedID: input.ID}, nil
 }
 
+func (r *queryResolver) Articles(ctx context.Context) ([]*model.Article, error) {
+	return r.Accessor.List()
+}
+
 func (r *queryResolver) Node(ctx context.Context, id string) (model.Node, error) {
 	a, err := r.Accessor.Read(id)
 	if err != nil {
