@@ -10,7 +10,7 @@ type Query {
 type Article implements Node {
   id: ID!
   title: String!
-  body: String
+  body: String!
 }
 
 type Mutation {
@@ -21,7 +21,7 @@ type Mutation {
 
 input AddArticleInput {
   title: String!
-  body: String
+  body: String!
 }
 
 type AddArticlePayload {
@@ -31,7 +31,7 @@ type AddArticlePayload {
 input UpdateArticleInput {
   id: ID!
   title: String!
-  body: String
+  body: String!
 }
 
 type UpdateArticlePayload {
