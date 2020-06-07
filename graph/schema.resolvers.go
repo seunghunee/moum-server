@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 
+	"github.com/seunghunee/moum-server/accessor"
 	"github.com/seunghunee/moum-server/graph/generated"
 	"github.com/seunghunee/moum-server/graph/model"
 )
@@ -42,6 +43,19 @@ func (r *mutationResolver) DeleteArticle(ctx context.Context, input model.Delete
 
 func (r *queryResolver) Articles(ctx context.Context) ([]*model.Article, error) {
 	return r.Accessor.List()
+}
+
+func (r *queryResolver) Article(ctx context.Context, title string) (*model.Article, error) {
+	articles, err := r.Accessor.List()
+	if err != nil {
+		return &model.Article{}, err
+	}
+	for _, a := range articles {
+		if a.Title == title {
+			return a, nil
+		}
+	}
+	return &model.Article{}, accessor.ErrArticleNotExist
 }
 
 func (r *queryResolver) Node(ctx context.Context, id string) (model.Node, error) {

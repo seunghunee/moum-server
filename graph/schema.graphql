@@ -4,6 +4,7 @@ interface Node {
 
 type Query {
   articles: [Article!]!
+  article(title: String!): Article
   node(id: ID!): Node
 }
 
