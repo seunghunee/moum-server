@@ -1,2 +1,6 @@
 # gqlgen
 graph/generated/generated.go
+
+#Added by cargo
+
+/target
