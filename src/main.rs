@@ -15,6 +15,13 @@ mod models {
     }
 
     #[derive(juniper::GraphQLInputObject)]
+    pub struct UpdateArticleInput {
+        pub id: i32,
+        pub title: String,
+        pub body: String,
+    }
+
+    #[derive(juniper::GraphQLInputObject)]
     pub struct DeleteArticleInput {
         pub id: i32,
     }
@@ -65,6 +72,18 @@ impl Mutation {
         let conn = ctx.pool.get().expect("Error: get db pool");
         diesel::insert_into(articles::table)
             .values(input)
+            .get_result::<Article>(&conn)
+            .expect("Error saving new article");
+        Ok(true)
+    }
+    fn updateArticle(ctx: &mut Ctx, input: UpdateArticleInput) -> FieldResult<bool> {
+        use schema::articles;
+        let conn = ctx.pool.get().expect("Error: get db pool");
+        diesel::update(articles::table.find(input.id))
+            .set((
+                articles::title.eq(input.title),
+                articles::body.eq(input.body),
+            ))
             .get_result::<Article>(&conn)
             .expect("Error saving new article");
         Ok(true)
