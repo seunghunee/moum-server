@@ -13,6 +13,11 @@ mod models {
         title: String,
         body: String,
     }
+
+    #[derive(juniper::GraphQLInputObject)]
+    pub struct DeleteArticleInput {
+        pub id: i32,
+    }
 }
 
 mod schema;
@@ -62,6 +67,14 @@ impl Mutation {
             .values(input)
             .get_result::<Article>(&conn)
             .expect("Error saving new article");
+        Ok(true)
+    }
+    fn deleteArticle(ctx: &mut Ctx, input: DeleteArticleInput) -> FieldResult<bool> {
+        use schema::articles::dsl::*;
+        let conn = ctx.pool.get().expect("Error: get db pool");
+        diesel::delete(articles.find(input.id))
+            .execute(&conn)
+            .expect("Error deleting article");
         Ok(true)
     }
 }
