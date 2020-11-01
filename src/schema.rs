@@ -1,6 +1,6 @@
 table! {
     articles (id) {
-        id -> Int4,
+        id -> Uuid,
         title -> Varchar,
         body -> Text,
     }

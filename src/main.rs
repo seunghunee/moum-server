@@ -1,9 +1,21 @@
 mod models {
-    #[derive(juniper::GraphQLObject, Queryable)]
+    #[derive(Queryable)]
     pub struct Article {
-        id: i32,
+        id: uuid::Uuid,
         title: String,
         body: String,
+    }
+    #[juniper::graphql_object]
+    impl Article {
+        fn id(&self) -> juniper::ID {
+            self.id.to_string().into()
+        }
+        fn title(&self) -> &str {
+            self.title.as_str()
+        }
+        fn body(&self) -> &str {
+            self.body.as_str()
+        }
     }
 
     use super::schema::articles;
@@ -16,14 +28,14 @@ mod models {
 
     #[derive(juniper::GraphQLInputObject)]
     pub struct UpdateArticleInput {
-        pub id: i32,
+        pub id: juniper::ID,
         pub title: String,
         pub body: String,
     }
 
     #[derive(juniper::GraphQLInputObject)]
     pub struct DeleteArticleInput {
-        pub id: i32,
+        pub id: juniper::ID,
     }
 }
 
@@ -79,7 +91,7 @@ impl Mutation {
     fn updateArticle(ctx: &mut Ctx, input: UpdateArticleInput) -> FieldResult<bool> {
         use schema::articles;
         let conn = ctx.pool.get().expect("Error: get db pool");
-        diesel::update(articles::table.find(input.id))
+        diesel::update(articles::table.find(uuid::Uuid::parse_str(&input.id).unwrap()))
             .set((
                 articles::title.eq(input.title),
                 articles::body.eq(input.body),
@@ -91,7 +103,7 @@ impl Mutation {
     fn deleteArticle(ctx: &mut Ctx, input: DeleteArticleInput) -> FieldResult<bool> {
         use schema::articles::dsl::*;
         let conn = ctx.pool.get().expect("Error: get db pool");
-        diesel::delete(articles.find(input.id))
+        diesel::delete(articles.find(uuid::Uuid::parse_str(&input.id).unwrap()))
             .execute(&conn)
             .expect("Error deleting article");
         Ok(true)
