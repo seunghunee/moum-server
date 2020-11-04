@@ -74,6 +74,15 @@ impl Query {
             .expect("Error loading articles");
         Ok(result)
     }
+    fn article(ctx: &Ctx, title: String) -> FieldResult<Article> {
+        use schema::articles;
+        let conn = ctx.pool.get().expect("Error pool get");
+        let result = articles::table
+            .filter(articles::title.eq(&title))
+            .first::<Article>(&conn)
+            .expect("Error loading article");
+        Ok(result)
+    }
 }
 
 struct Mutation;
