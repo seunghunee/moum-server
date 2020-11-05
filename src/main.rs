@@ -37,6 +37,10 @@ mod models {
     pub struct DeleteArticleInput {
         pub id: juniper::ID,
     }
+    #[derive(juniper::GraphQLObject)]
+    pub struct DeleteArticlePayload {
+        pub deleted_id: juniper::ID,
+    }
 }
 
 mod schema;
@@ -109,13 +113,18 @@ impl Mutation {
             .expect("Error saving new article");
         Ok(true)
     }
-    fn deleteArticle(ctx: &mut Ctx, input: DeleteArticleInput) -> FieldResult<bool> {
+    fn deleteArticle(
+        ctx: &mut Ctx,
+        input: DeleteArticleInput,
+    ) -> FieldResult<DeleteArticlePayload> {
         use schema::articles::dsl::*;
         let conn = ctx.pool.get().expect("Error: get db pool");
         diesel::delete(articles.find(uuid::Uuid::parse_str(&input.id).unwrap()))
             .execute(&conn)
             .expect("Error deleting article");
-        Ok(true)
+        Ok(DeleteArticlePayload {
+            deleted_id: input.id,
+        })
     }
 }
 
