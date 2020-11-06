@@ -92,7 +92,7 @@ impl Query {
 struct Mutation;
 #[juniper::graphql_object(Context = Ctx)]
 impl Mutation {
-    fn addArticle(ctx: &mut Ctx, input: AddArticleInput) -> FieldResult<bool> {
+    fn add_article(ctx: &mut Ctx, input: AddArticleInput) -> FieldResult<bool> {
         use schema::articles;
         let conn = ctx.pool.get().expect("Error: get db pool");
         diesel::insert_into(articles::table)
@@ -101,7 +101,7 @@ impl Mutation {
             .expect("Error saving new article");
         Ok(true)
     }
-    fn updateArticle(ctx: &mut Ctx, input: UpdateArticleInput) -> FieldResult<bool> {
+    fn update_article(ctx: &mut Ctx, input: UpdateArticleInput) -> FieldResult<bool> {
         use schema::articles;
         let conn = ctx.pool.get().expect("Error: get db pool");
         diesel::update(articles::table.find(uuid::Uuid::parse_str(&input.id).unwrap()))
@@ -113,7 +113,7 @@ impl Mutation {
             .expect("Error saving new article");
         Ok(true)
     }
-    fn deleteArticle(
+    fn delete_article(
         ctx: &mut Ctx,
         input: DeleteArticleInput,
     ) -> FieldResult<DeleteArticlePayload> {
