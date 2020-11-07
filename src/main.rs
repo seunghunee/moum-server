@@ -42,6 +42,15 @@ mod models {
         pub title: String,
         pub body: String,
     }
+    pub struct UpdateArticlePayload {
+        pub article: Article,
+    }
+    #[juniper::graphql_object]
+    impl UpdateArticlePayload {
+        fn article(&self) -> &Article {
+            &self.article
+        }
+    }
 
     #[derive(juniper::GraphQLInputObject)]
     pub struct DeleteArticleInput {
@@ -111,17 +120,21 @@ impl Mutation {
             .expect("Error saving new article");
         Ok(AddArticlePayload { article })
     }
-    fn update_article(ctx: &mut Ctx, input: UpdateArticleInput) -> FieldResult<bool> {
+    fn update_article(
+        ctx: &mut Ctx,
+        input: UpdateArticleInput,
+    ) -> FieldResult<UpdateArticlePayload> {
         use schema::articles;
         let conn = ctx.pool.get().expect("Error: get db pool");
-        diesel::update(articles::table.find(uuid::Uuid::parse_str(&input.id).unwrap()))
-            .set((
-                articles::title.eq(input.title),
-                articles::body.eq(input.body),
-            ))
-            .get_result::<Article>(&conn)
-            .expect("Error saving new article");
-        Ok(true)
+        let article =
+            diesel::update(articles::table.find(uuid::Uuid::parse_str(&input.id).unwrap()))
+                .set((
+                    articles::title.eq(input.title),
+                    articles::body.eq(input.body),
+                ))
+                .get_result::<Article>(&conn)
+                .expect("Error saving new article");
+        Ok(UpdateArticlePayload { article })
     }
     fn delete_article(
         ctx: &mut Ctx,
