@@ -26,6 +26,16 @@ mod models {
         body: String,
     }
 
+    pub struct AddArticlePayload {
+        pub article: Article,
+    }
+    #[juniper::graphql_object]
+    impl AddArticlePayload {
+        fn article(&self) -> &Article {
+            &self.article
+        }
+    }
+
     #[derive(juniper::GraphQLInputObject)]
     pub struct UpdateArticleInput {
         pub id: juniper::ID,
@@ -92,14 +102,14 @@ impl Query {
 struct Mutation;
 #[juniper::graphql_object(Context = Ctx)]
 impl Mutation {
-    fn add_article(ctx: &mut Ctx, input: AddArticleInput) -> FieldResult<bool> {
+    fn add_article(ctx: &mut Ctx, input: AddArticleInput) -> FieldResult<AddArticlePayload> {
         use schema::articles;
         let conn = ctx.pool.get().expect("Error: get db pool");
-        diesel::insert_into(articles::table)
+        let article = diesel::insert_into(articles::table)
             .values(input)
             .get_result::<Article>(&conn)
             .expect("Error saving new article");
-        Ok(true)
+        Ok(AddArticlePayload { article })
     }
     fn update_article(ctx: &mut Ctx, input: UpdateArticleInput) -> FieldResult<bool> {
         use schema::articles;
