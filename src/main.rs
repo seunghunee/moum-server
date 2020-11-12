@@ -69,14 +69,12 @@ extern crate diesel;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
-use std::env;
 
 use self::models::*;
 
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Method, Response, Server, StatusCode};
 use juniper::{EmptySubscription, FieldResult, RootNode};
-use std::net::SocketAddr;
 use std::sync::Arc;
 
 struct Ctx {
@@ -155,10 +153,9 @@ type Schema = RootNode<'static, Query, Mutation, EmptySubscription<Ctx>>;
 
 #[tokio::main]
 async fn main() {
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let config = Config::new();
 
-    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let manager = ConnectionManager::new(db_url);
+    let manager = ConnectionManager::new(config.db_url);
     let pool = Pool::new(manager).expect("Error pool");
     let ctx = Arc::new(Ctx { pool });
     let root_node = Arc::new(Schema::new(Query, Mutation, EmptySubscription::new()));
@@ -188,9 +185,25 @@ async fn main() {
         }
     });
 
+    // TODO: Random port number
+    let addr = ([127, 0, 0, 1], config.port).into();
     let server = Server::bind(&addr).serve(make_svc);
 
     if let Err(e) = server.await {
         eprintln!("server error: {}", e);
+    }
+}
+
+struct Config {
+    db_url: String,
+    port: u16,
+}
+
+use std::env;
+impl Config {
+    fn new() -> Config {
+        let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+        Config { db_url, port: 8080 }
     }
 }
