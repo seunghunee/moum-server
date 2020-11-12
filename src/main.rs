@@ -151,9 +151,14 @@ impl Mutation {
 
 type Schema = RootNode<'static, Query, Mutation, EmptySubscription<Ctx>>;
 
+use std::process;
+
 #[tokio::main]
 async fn main() {
-    let config = Config::new();
+    let config = Config::new().unwrap_or_else(|err| {
+        eprintln!("{}", err);
+        process::exit(1);
+    });
 
     let manager = ConnectionManager::new(config.db_url);
     let pool = Pool::new(manager).expect("Error pool");
@@ -190,7 +195,7 @@ async fn main() {
     let server = Server::bind(&addr).serve(make_svc);
 
     if let Err(e) = server.await {
-        eprintln!("server error: {}", e);
+        eprintln!("moum: {}", e);
     }
 }
 
@@ -201,9 +206,10 @@ struct Config {
 
 use std::env;
 impl Config {
-    fn new() -> Config {
-        let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-
-        Config { db_url, port: 8080 }
+    fn new() -> Result<Config, &'static str> {
+        match env::var("DATABASE_URL") {
+            Err(_) => Err("moum: DATABASE_URL must be set"),
+            Ok(db_url) => Ok(Config { db_url, port: 8080 }),
+        }
     }
 }
