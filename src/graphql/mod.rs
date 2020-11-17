@@ -4,11 +4,22 @@ pub use query::Query;
 pub mod mutation;
 pub use mutation::Mutation;
 
-use diesel::pg::PgConnection;
-pub use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::{
+    pg::PgConnection,
+    r2d2::{ConnectionManager, Pool},
+};
+use std::error::Error;
 
 pub struct Ctx {
-    pub pool: Pool<ConnectionManager<PgConnection>>,
+    pool: Pool<ConnectionManager<PgConnection>>,
 }
 
 impl juniper::Context for Ctx {}
+impl Ctx {
+    pub fn new(db_url: &str) -> Result<Ctx, Box<dyn Error>> {
+        let manager = ConnectionManager::new(db_url);
+        let pool = Pool::new(manager)?;
+
+        Ok(Ctx { pool })
+    }
+}

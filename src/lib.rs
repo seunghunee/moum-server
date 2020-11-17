@@ -2,34 +2,20 @@ mod graphql;
 mod models;
 mod schema;
 
-pub struct Config {
-    pub db_url: String,
-    pub port: u16,
-}
-
-use std::env;
-impl Config {
-    pub fn new() -> Result<Config, &'static str> {
-        match env::var("DATABASE_URL") {
-            Err(_) => Err("DATABASE_URL must be set"),
-            Ok(db_url) => Ok(Config { db_url, port: 8080 }),
-        }
-    }
-}
-
 #[macro_use]
 extern crate diesel;
-use graphql::{Mutation, Query, *};
+
 use hyper::{
     service::{make_service_fn, service_fn},
     Method, Response, Server, StatusCode,
 };
 use juniper::{EmptySubscription, RootNode};
-use std::{error::Error, sync::Arc};
+use std::{env, error::Error, sync::Arc};
+
+use graphql::{Mutation, Query, *};
+
 pub async fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let manager = ConnectionManager::new(config.db_url);
-    let pool = Pool::new(manager)?;
-    let ctx = Arc::new(Ctx { pool });
+    let ctx = Arc::new(Ctx::new(&config.db_url)?);
     let root_node = Arc::new(RootNode::new(Query, Mutation, EmptySubscription::new()));
     let make_svc = make_service_fn(move |_| {
         let ctx = ctx.clone();
@@ -63,4 +49,18 @@ pub async fn run(config: Config) -> Result<(), Box<dyn Error>> {
     server.await?;
 
     Ok(())
+}
+
+pub struct Config {
+    pub db_url: String,
+    pub port: u16,
+}
+
+impl Config {
+    pub fn new() -> Result<Config, &'static str> {
+        match env::var("DATABASE_URL") {
+            Err(_) => Err("DATABASE_URL must be set"),
+            Ok(db_url) => Ok(Config { db_url, port: 8080 }),
+        }
+    }
 }
