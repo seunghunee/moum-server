@@ -1,4 +1,8 @@
-use super::*;
+use diesel::prelude::*;
+use juniper::FieldResult;
+
+use super::Ctx;
+use crate::models::Article;
 
 pub struct Query;
 
