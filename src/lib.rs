@@ -2,14 +2,6 @@ mod graphql;
 mod models;
 mod schema;
 
-#[macro_use]
-extern crate diesel;
-
-use hyper::service::{make_service_fn, service_fn};
-use hyper::{Method, Response, Server, StatusCode};
-use juniper::{EmptySubscription, RootNode};
-use std::sync::Arc;
-
 pub struct Config {
     pub db_url: String,
     pub port: u16,
@@ -25,10 +17,15 @@ impl Config {
     }
 }
 
-use graphql::mutation::*;
-use graphql::query::*;
-use graphql::*;
-use std::error::Error;
+#[macro_use]
+extern crate diesel;
+use graphql::{Mutation, Query, *};
+use hyper::{
+    service::{make_service_fn, service_fn},
+    Method, Response, Server, StatusCode,
+};
+use juniper::{EmptySubscription, RootNode};
+use std::{error::Error, sync::Arc};
 pub async fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let manager = ConnectionManager::new(config.db_url);
     let pool = Pool::new(manager)?;
