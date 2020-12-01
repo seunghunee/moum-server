@@ -64,3 +64,13 @@ impl Config {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new_config_without_database_url_should_error() {
+        assert!(Config::new().is_err());
+    }
+}
