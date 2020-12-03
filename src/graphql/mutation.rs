@@ -12,9 +12,9 @@ pub struct Mutation;
 #[juniper::graphql_object(Context = Ctx)]
 impl Mutation {
     fn add_article(ctx: &mut Ctx, input: AddArticleInput) -> FieldResult<AddArticlePayload> {
-        use crate::schema::articles;
+        use crate::schema::articles::dsl::*;
         let conn = ctx.pool.get()?;
-        let article = diesel::insert_into(articles::table)
+        let article = diesel::insert_into(articles)
             .values(input)
             .get_result::<Article>(&conn)?;
         Ok(AddArticlePayload { article })
@@ -23,13 +23,10 @@ impl Mutation {
         ctx: &mut Ctx,
         input: UpdateArticleInput,
     ) -> FieldResult<UpdateArticlePayload> {
-        use crate::schema::articles;
+        use crate::schema::articles::dsl::*;
         let conn = ctx.pool.get()?;
-        let article = diesel::update(articles::table.find(uuid::Uuid::parse_str(&input.id)?))
-            .set((
-                articles::title.eq(input.title),
-                articles::body.eq(input.body),
-            ))
+        let article = diesel::update(articles.find(uuid::Uuid::parse_str(&input.id)?))
+            .set((title.eq(input.title), body.eq(input.body)))
             .get_result::<Article>(&conn)?;
         Ok(UpdateArticlePayload { article })
     }
