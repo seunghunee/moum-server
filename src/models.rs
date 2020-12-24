@@ -1,4 +1,10 @@
-use juniper::{graphql_object, GraphQLInputObject, GraphQLObject, ID};
+use juniper::{graphql_interface, graphql_object, GraphQLInputObject, GraphQLObject, ID};
+
+// TODO: 근본적인 문제해결 (https://github.com/graphql-rust/juniper/issues/814)
+#[graphql_interface(for = Article)]
+pub trait Node {
+    fn id(&self) -> ID;
+}
 
 #[derive(Queryable)]
 pub struct Article {
@@ -6,7 +12,7 @@ pub struct Article {
     title: String,
     body: String,
 }
-#[graphql_object]
+#[graphql_object(impl = NodeValue)]
 impl Article {
     fn id(&self) -> ID {
         self.id.to_string().into()
@@ -16,6 +22,12 @@ impl Article {
     }
     fn body(&self) -> &str {
         self.body.as_str()
+    }
+}
+#[graphql_interface]
+impl Node for Article {
+    fn id(&self) -> ID {
+        self.id.to_string().into()
     }
 }
 
